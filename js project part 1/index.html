@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="timer" id="timer"></div>
+    <div class="container">
+        <div class="quote-display" id="quoteDisplay"></div>
+        <textarea name="" id="quoteInput"class="quote-input" autofocus></textarea>
+        
+    </div>
+
+    <script defer>
+        const RANDOM_QUOTE_API_URL = 'http://api.quotable.io/random';
+const quoteDisplayElement = document.getElementById('quoteDisplay');
+const quoteInputElement = document.getElementById('quoteInput');
+const timerElement = document.getElementById('timer'); // Fixed variable name to match ID
+let timerInterval; // Variable to hold the timer interval ID
+
+quoteInputElement.addEventListener('input', () => {
+    const arrayQuote = quoteDisplayElement.querySelectorAll('span');
+    const arrayValue = quoteInputElement.value.split('');
+    let correct = true;
+
+    arrayQuote.forEach((characterSpan, index) => {
+        const character = arrayValue[index];
+        if (character == null) {
+            characterSpan.classList.remove('correct');
+            characterSpan.classList.remove('incorrect');
+            correct = false;
+        } else if (character === characterSpan.innerText) {
+            characterSpan.classList.add('correct');
+            characterSpan.classList.remove('incorrect');
+        } else {
+            characterSpan.classList.remove('correct');
+            characterSpan.classList.add('incorrect');
+            correct = false;
+        }
+    });
+
+    if (correct) renderNewQuote();
+});
+
+function getRandomQuote() {
+    return fetch(RANDOM_QUOTE_API_URL)
+        .then(response => response.json())
+        .then(data => data.content);
+}
+
+async function renderNewQuote() {
+    const quote = await getRandomQuote();
+    quoteDisplayElement.innerHTML = '';
+    quote.split('').forEach(character => {
+        const characterSpan = document.createElement('span');
+        characterSpan.innerText = character;
+        quoteDisplayElement.appendChild(characterSpan);
+    });
+    quoteInputElement.value = ''; // Fixed the typo "valu" to "value"
+    startTimer();
+}
+
+let startTime;
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval); // Clear any previous timer
+    timerElement.innerText = 0;
+    startTime = new Date();
+    timerInterval = setInterval(() => {
+        timerElement.innerText = getTimerTime();
+    }, 1000);
+}
+
+function getTimerTime() {
+    return Math.floor((new Date() - startTime) / 1000);
+}
+
+renderNewQuote();
+
+    </script>
+</body>
+</html>
